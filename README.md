@@ -69,3 +69,11 @@ hyperparameters.model_patches = [
     Patch(0.9, 4), # a c f i j h g e d b      tota: 10
 ]
 ```
+
+# TODO
+
+There are a few things we can do to round out this project:
+
+1. Hyperparameter search - as mentioned at the [above](#where--how-to-insert) section, we have a lot of flexibility in choosing the insertion strategy. We could write a script that would launch several training processes, each with its own strategy and then compare them.
+2. Expandability - We could run various expandability techniques on newly inserted layers, and previously shifted layers and see if there is a significant difference between them. For specifics, check out this [survey](https://dl.acm.org/doi/full/10.1145/3639372).
+3. Metrics & Statistics - One of the metrics that HF exports to Tensorboard is the training gradient norm. One interesting observation is that the norm of `12-layer` run initially was greater than the `1-10-PLI` run. We could extract similar metrics. For example, we could load the model at different checkpoints, and plot their parameters using something like T-SNE in order to see how far newly inserted layers shift from their initialization, or to see if inserting a new layer somehow creates a "disturbance" for the other layers.

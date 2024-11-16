@@ -9,12 +9,12 @@ PLI is based on the following heuristics.
 - Transfer learning can provide a better starting point for training NNs than random initialization.
 
 ![intro-plots](./intro/plot-intro.png)
-**FIGURE 1**: Training `Bert` with either `2`, `4`, or `8` layers. The y axis is teh loss. The `x` axis on the left is the training iteration. The `y` axis on the right is the training duration.
+**FIGURE 1**: Training `Bert` with either `2`, `4`, or `8` layers. The y axis is the loss. The `x` axis on the left is the training iteration. The `x` axis on the right is the training duration.
 
 This means that theoretically, during the initial phases of learning, there is no need to train the entire NN, since training a smaller network could lead to better results, more quickly. Then, after an appropriate amount of training, the NN could be gradually increased by adding more layers.
 
 ![intro-plots](./intro/plot-intro-pli.png)
-**FIGURE 2**: Training `Bert` with either `12` layers, or using PLI to gradually increase the number of layers from `1` to `10`. The y axis is teh loss. The `x` axis on the left is the training iteration. The `y` axis on the right is the training duration. More details at the [appendix](#appendix).
+**FIGURE 2**: Training `Bert` with either `12` layers, or using PLI to gradually increase the number of layers from `1` to `10`. The y axis is the loss. The `x` axis on the left is the training iteration. The `x` axis on the right is the training duration. More details at the [appendix](#appendix).
 
 As mention before, PLI works best when the network is built of repeating identical layers. For example: transformers. The core part of the transformers is a repeating sequence of either encoder or decoder blocks. During pre-training, PLI could be inserted into the training loop, and gradually increase the amount of layers periodically.
 
@@ -70,10 +70,25 @@ hyperparameters.model_patches = [
 ]
 ```
 
-# TODO
+# TODO - Document
 
 There are a few things we can do to round out this project:
 
 1. Hyperparameter search - as mentioned at the [above](#where--how-to-insert) section, we have a lot of flexibility in choosing the insertion strategy. We could write a script that would launch several training processes, each with its own strategy and then compare them.
 2. Expandability - We could run various expandability techniques on newly inserted layers, and previously shifted layers and see if there is a significant difference between them. For specifics, check out this [survey](https://dl.acm.org/doi/full/10.1145/3639372).
 3. Metrics & Statistics - One of the metrics that HF exports to Tensorboard is the training gradient norm. One interesting observation is that the norm of `12-layer` run initially was greater than the `1-10-PLI` run. We could extract similar metrics. For example, we could load the model at different checkpoints, and plot their parameters using something like T-SNE in order to see how far newly inserted layers shift from their initialization, or to see if inserting a new layer somehow creates a "disturbance" for the other layers.
+
+# TODO - Architecture
+
+1. Add noise to new layers - basically, after creating a by cloning it from another, add some small amount of Gaussian noise to the its parameters.
+2. L2 grad norm tracking - currently, HF already report s the L2 grad norm of the entire network, however I would also like us to have the l2 norms of the individual attention heads (and maybe of the fully connected layer as well).
+3. Progressive head increase - just like we gradually add new layers during training, we can also start with a smaller amount of attention heads. There is actually quite a bit of research showing that fair amounts of the attention heads can be pruned without affecting the performance of the network.
+4. Proper CLI - right now most of the configuration is done by changing hard coded parameters in the code. I would prefer to have a proper CLI using something like argparse and a Makefile with some presets.
+5. Explore layer swap as a mean of regularization
+
+# Resources & Paper
+
+- [Are Sixteen Heads Really Better than One?](https://arxiv.org/abs/1905.10650v1)
+- [Efficient Training of BERT by Progressively Stacking](https://proceedings.mlr.press/v97/gong19a/gong19a.pdf)
+- [On the Transformer Growth for Progressive BERT Training](https://arxiv.org/abs/2010.12562)
+- [A Primer in BERTology: What We Know About How BERT Works](https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00349/96482/A-Primer-in-BERTology-What-We-Know-About-How-BERT)
